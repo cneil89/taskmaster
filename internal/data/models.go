@@ -11,8 +11,13 @@ var (
 )
 
 type Models struct {
+	Projects ProjectModel
+	Tasks    TaskModel
 }
 
 func NewModels(db *sql.DB) Models {
-	return Models{}
+	return Models{
+		Projects: ProjectModel{DB: db},
+		Tasks:    TaskModel{DB: db},
+	}
 }
