@@ -42,7 +42,7 @@ func main() {
 
 	cfg.db.dsn = dsn
 
-	db, err := db.OpenDB(dsn)
+	db, err := db.OpenDB(cfg.db.dsn)
 	if err != nil {
 		fmt.Printf("Unable to open database: %s", err.Error())
 		os.Exit(1)

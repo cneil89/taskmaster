@@ -96,24 +96,35 @@ func initDB(db *sql.DB) error {
 	return nil
 }
 
+// NOTE: This this be handled by migrations in the future
+// TODO: Handle via migrations
 func bootstrapDatabase(db *sql.DB) error {
 	stmts := []string{
 		`CREATE TABLE IF NOT EXISTS projects (
-			uuid TEXT PRIMARY KEY,
+			id INTEGER PRIMARY KEY,
 			created_at NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			name TEXT NOT NULL,
 			short_name TEXT NOT NULL,
+			active BOOLEAN NOT NULL DEFAULT false,
+			next_task_num INTEGER NOT NULL DEFAULT 1,
 			CONSTRAINT uidx_name_shortname UNIQUE (name)
 		);`,
 		`CREATE TABLE IF NOT EXISTS tasks (
-			uuid text PRIMARY KEY,
+			id INTEGER PRIMARY KEY,
 			created_at NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			status TEXT NOT NULL DEFAULT 'defining',
-			task_id string NOT NULL,
-			project_id TEXT NOT NULL,
+			status TEXT NOT NULL DEFAULT 'defining'
+				CHECK(status IN(
+					'defining',
+					'todo',
+					'in-progress',
+					'under-review',
+					'completed'
+				)),
+			task_id string NOT NULL UNIQUE,
+			project_id INTEGER NOT NULL,
 			name TEXT NOT NULL,
 			description TEXT,
-			CONSTRAINT project_id_fk FOREIGN KEY (project_id) REFERENCES projects(uuid) ON DELETE CASCADE
+			CONSTRAINT project_id_fk FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 		);`,
 	}
 
