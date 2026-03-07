@@ -35,7 +35,7 @@ func (m *ProjectModel) Insert(name, shortName string) error {
 		return err
 	}
 
-	// Set the active project
+	// Set new project as the active project
 	err = m.SetActiveProject(projectID)
 
 	return nil
@@ -87,6 +87,26 @@ func (m *ProjectModel) GetActiveProject() (Project, error) {
 	}
 
 	return project, nil
+}
+
+func (m *ProjectModel) GetActiveForUpdate(ctx context.Context, db DBTX) (Project, int, error) {
+	var p Project
+	var next int
+
+	row := db.QueryRowContext(ctx, `SELECT id, name, short_name, active, next_task_value FROM projects WHERE active = true;`)
+	if err := row.Scan(&p.ID, &p.Name, &p.ShortName, &p.Active, &next); err != nil {
+		return Project{}, 0, err
+	}
+
+	return p, next, nil
+}
+
+// Increment the next task id value
+func (m *ProjectModel) IncrementNextTaskValue(ctx context.Context, db DBTX, id int, next int) error {
+	// To try an prevent race conditions, use the next value provided to search for the project
+	_, err := db.ExecContext(ctx, `UPDATE projects SET next_task_value = ? WHERE id =? AND next_task_value = ?;`, next+1, id, next)
+
+	return err
 }
 
 func (m *ProjectModel) SetActiveProject(id int) error {

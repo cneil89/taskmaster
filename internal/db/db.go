@@ -106,7 +106,7 @@ func bootstrapDatabase(db *sql.DB) error {
 			name TEXT NOT NULL,
 			short_name TEXT NOT NULL,
 			active BOOLEAN NOT NULL DEFAULT false,
-			next_task_num INTEGER NOT NULL DEFAULT 1,
+			next_task_value INTEGER NOT NULL DEFAULT 1,
 			CONSTRAINT uidx_name_shortname UNIQUE (name)
 		);`,
 		`CREATE TABLE IF NOT EXISTS tasks (
@@ -116,8 +116,8 @@ func bootstrapDatabase(db *sql.DB) error {
 				CHECK(status IN(
 					'defining',
 					'todo',
-					'in-progress',
-					'under-review',
+					'in progress',
+					'under review',
 					'completed'
 				)),
 			task_id string NOT NULL UNIQUE,

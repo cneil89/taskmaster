@@ -18,6 +18,6 @@ type Models struct {
 func NewModels(db *sql.DB) Models {
 	return Models{
 		Projects: ProjectModel{DB: db},
-		Tasks:    TaskModel{DB: db},
+		Tasks:    TaskModel{DB: db, Projects: &ProjectModel{db}},
 	}
 }
