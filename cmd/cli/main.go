@@ -11,7 +11,8 @@ import (
 )
 
 type config struct {
-	db struct {
+	testing bool
+	db      struct {
 		dsn string
 	}
 }
@@ -26,6 +27,7 @@ var version = vcs.Version()
 func main() {
 	fmt.Println("Taskmaster CLI")
 	var cfg config
+	flag.BoolVar(&cfg.testing, "testing", false, "toggle testing NOTE: WILL DELETE ALL DATA")
 
 	displayVersion := flag.Bool("version", false, "display version and exit")
 	flag.Parse()
