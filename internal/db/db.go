@@ -124,6 +124,7 @@ func bootstrapDatabase(db *sql.DB) error {
 			project_id INTEGER NOT NULL,
 			name TEXT NOT NULL,
 			description TEXT,
+			version INTEGER NOT NULL DEFAULT 1,
 			CONSTRAINT project_id_fk FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 		);`,
 	}

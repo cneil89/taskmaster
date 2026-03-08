@@ -12,28 +12,47 @@ func (app *application) Run() error {
 		fmt.Println("\n- Deleting all data")
 		app.models.Tasks.DeleteAll()
 		app.models.Projects.DeleteAll()
+		app.insertProject("Taskmaster", "taskm")
+		app.addTasks(5)
+		app.insertProject("Testing 1", "test1")
+		app.addTasks(4)
+		app.insertProject("Testing 2", "test2")
+		app.addTasks(8)
+
+		app.printAllProjects()
+		app.getActiveProject()
+		app.setActiveProject(1) // Project: Taskmaster
+
+		app.printAllProjects()
+		app.getActiveProject()
+
+		app.addTasks(12)
+
+		app.printActiveProjectTasks()
+		app.setActiveProject(3) // Project: Test2
+		app.printActiveProjectTasks()
 	}
-	app.insertProject("Taskmaster", "taskm")
-	app.addTasks(5)
-	app.insertProject("Testing 1", "test1")
-	app.addTasks(4)
-	app.insertProject("Testing 2", "test2")
-	app.addTasks(8)
-
-	app.printAllProjects()
-	app.getActiveProject()
-	app.setActiveProject(1) // Project: Taskmaster
-
-	app.printAllProjects()
-	app.getActiveProject()
-
-	app.addTasks(12)
 
 	return nil
 }
 
 // TODO: DELETE These
 // NOTE: Helper functions for testing
+
+func (app *application) printActiveProjectTasks() {
+	fmt.Println("- Printing Tasks for Active Project")
+	tasks, err := app.models.Tasks.GetAllTasksForActiveProject()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("\t   %10s | %15s | %14s | %s | %s\n", "TaskID", "TaskName", "TaskStatus", "v", "TaskDescription")
+	fmt.Printf("\t  -%10s-|-%15s-|-%14s-|-%s-|-%s\n", "----------", "---------------", "--------------", "-", "--------")
+	for _, task := range tasks {
+		fmt.Printf("\t- %10s | %15s | %14s | %d | %s\n", task.TaskID, task.Name, task.Status, task.Version, task.Description)
+	}
+}
+
 func (app *application) addTasks(n int) {
 	fmt.Printf("- Running Insert Tasks (count: %d)\n", n)
 	for i := range n {
