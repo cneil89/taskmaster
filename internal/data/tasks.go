@@ -18,6 +18,11 @@ type Task struct {
 	Version     int
 }
 
+func (t *Task) Debug() {
+	fmt.Printf("{ProjID:%s Status:%s TaskID:%s Name:%s, Desc:%s Version:%d}\n",
+		t.ProjectID, t.Status, t.TaskID, t.Name, t.Description, t.Version)
+}
+
 type TaskModel struct {
 	DB       *sql.DB
 	Projects *ProjectModel
@@ -95,14 +100,16 @@ func (m *TaskModel) Update(task Task) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
+	task.Debug()
 	stmt, err := m.DB.PrepareContext(ctx, `UPDATE tasks SET name = ?, status = ?, description = ?, version = ?
-								WHERE id = ?, task_id = ?, version = ?;`)
+										WHERE task_id = ? AND version = ?;`)
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.ExecContext(ctx, task.Name, task.Status, task.Description, task.Version+1, task.ID, task.TaskID, task.Version)
-	return nil
+	_, err = stmt.ExecContext(ctx, task.Name, task.Status, task.Description, task.Version+1, task.TaskID, task.Version)
+
+	return err
 }
 
 // TODO: DELETE THIS
