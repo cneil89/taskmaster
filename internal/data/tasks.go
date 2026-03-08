@@ -55,8 +55,7 @@ func (m *TaskModel) Insert(task Task) error {
 		return err
 	}
 
-	_, err = stmt.ExecContext(ctx, taskId, proj.ID, task.Name, task.Status.String(), task.Description)
-	if err != nil {
+	if _, err = stmt.ExecContext(ctx, taskId, proj.ID, task.Name, task.Status.String(), task.Description); err != nil {
 		return err
 	}
 
@@ -100,7 +99,6 @@ func (m *TaskModel) Update(task Task) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	task.Debug()
 	stmt, err := m.DB.PrepareContext(ctx, `UPDATE tasks SET name = ?, status = ?, description = ?, version = ?
 										WHERE task_id = ? AND version = ?;`)
 	if err != nil {
