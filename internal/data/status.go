@@ -24,7 +24,7 @@ var stringToStatus = map[string]Status{
 	"completed":    COMPLETED,
 }
 
-var statusToString = [...]string{"defining", "todo", "in progress", "under review", "completed"}
+var statusToString = [...]string{"Defining", "Todo", "In Progress", "Under Review", "Completed"}
 
 func ParseStatus(v string) (Status, error) {
 	s, ok := stringToStatus[strings.ToLower(strings.TrimSpace(v))]

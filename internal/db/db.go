@@ -114,11 +114,11 @@ func bootstrapDatabase(db *sql.DB) error {
 			created_at NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			status TEXT NOT NULL DEFAULT 'defining'
 				CHECK(status IN(
-					'defining',
-					'todo',
-					'in progress',
-					'under review',
-					'completed'
+					'Defining',
+					'Todo',
+					'In Progress',
+					'Under Review',
+					'Completed'
 				)),
 			task_id string NOT NULL UNIQUE,
 			project_id INTEGER NOT NULL,
