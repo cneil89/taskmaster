@@ -1,0 +1,50 @@
+package main
+
+import (
+	"github.com/cneil89/taskmaster/internal/data"
+	"github.com/rivo/tview"
+)
+
+const LOGO = ` ████████╗ █████╗ ███████╗██╗  ██╗███╗   ███╗ █████╗ ███████╗████████╗███████╗██████╗
+ ╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝████╗ ████║██╔══██╗██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+    ██║   ███████║███████╗█████╔╝ ██╔████╔██║███████║███████╗   ██║   █████╗  ██████╔╝
+    ██║   ██╔══██║╚════██║██╔═██╗ ██║╚██╔╝██║██╔══██║╚════██║   ██║   ██╔══╝  ██╔══██╗
+    ██║   ██║  ██║███████║██║  ██╗██║ ╚═╝ ██║██║  ██║███████║   ██║   ███████╗██║  ██║
+    ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝`
+
+func taskCellValue(t data.Task, col int) string {
+	switch col {
+	case 0:
+		return t.TaskID
+	case 1:
+		return t.Name
+	case 2:
+		return t.Status.String()
+	case 3:
+		return t.Description
+	default:
+		return ""
+	}
+}
+
+func centered(w, h int, p tview.Primitive) tview.Primitive {
+	return tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(
+			tview.NewFlex().
+				SetDirection(tview.FlexRow).
+				AddItem(nil, 0, 1, false).
+				AddItem(p, h, 1, true).
+				AddItem(nil, 0, 1, false),
+			w,
+			1,
+			true,
+		).
+		AddItem(nil, 0, 1, false)
+}
+
+func showModal(app *application, w, h int, p tview.Primitive) {
+	modal := centered(w, h, p)
+
+	app.state.pages.AddPage("modal", modal, true, true)
+}

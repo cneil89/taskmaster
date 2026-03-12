@@ -65,7 +65,7 @@ func (m *ProjectModel) GetAllProjects() ([]Project, error) {
 	return projects, nil
 }
 
-func (m *ProjectModel) GetActiveProject() (Project, error) {
+func (m *ProjectModel) GetActiveProject() (*Project, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -73,9 +73,11 @@ func (m *ProjectModel) GetActiveProject() (Project, error) {
 	var count int
 	err := m.DB.QueryRowContext(ctx, `SELECT count(*) FROM projects WHERE active = true;`).Scan(&count)
 	if err != nil {
-		return Project{}, err
+		return &Project{}, err
 	}
-	if count > 1 {
+	if count == 0 {
+		return nil, nil
+	} else if count > 1 {
 		panic("data integrity issue: more than 1 projects flagged as active.")
 	}
 
@@ -83,10 +85,10 @@ func (m *ProjectModel) GetActiveProject() (Project, error) {
 	err = m.DB.QueryRowContext(ctx, `SELECT id, name, short_name, active FROM projects WHERE active = true LIMIT 1;`).
 		Scan(&project.ID, &project.Name, &project.ShortName, &project.Active)
 	if err != nil {
-		return Project{}, nil
+		return &Project{}, nil
 	}
 
-	return project, nil
+	return &project, nil
 }
 
 func (m *ProjectModel) GetActiveForUpdate(ctx context.Context, db DBTX) (Project, int, error) {

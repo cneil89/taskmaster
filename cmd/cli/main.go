@@ -8,6 +8,7 @@ import (
 	"github.com/cneil89/taskmaster/internal/data"
 	"github.com/cneil89/taskmaster/internal/db"
 	"github.com/cneil89/taskmaster/internal/vcs"
+	"github.com/rivo/tview"
 )
 
 type config struct {
@@ -20,12 +21,28 @@ type config struct {
 type application struct {
 	config config
 	models data.Models
+	state  struct {
+		selectedRow int
+
+		activeProject     *data.Project
+		availableProjects []data.Project
+
+		selectedTask *data.Task
+		taskList     []data.Task
+		pages        *tview.Pages
+
+		component struct {
+			taskTable *tview.Table
+		}
+
+		// TODO: This is a little redundant, table shows all needed info
+		selectedTaskView *tview.TextView
+	}
 }
 
 var version = vcs.Version()
 
 func main() {
-	fmt.Println("Taskmaster CLI")
 	var cfg config
 	flag.BoolVar(&cfg.testing, "testing", false, "toggle testing WARNING: WILL DELETE ALL DATA")
 
@@ -33,6 +50,7 @@ func main() {
 	flag.Parse()
 
 	if *displayVersion {
+		fmt.Println("Taskmaster CLI")
 		fmt.Printf("Version: %s\n", version)
 		os.Exit(0)
 	}
@@ -53,6 +71,11 @@ func main() {
 	app := application{
 		config: cfg,
 		models: data.NewModels(db),
+	}
+
+	err = app.Init()
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
 	}
 
 	if err := app.Run(); err != nil {
