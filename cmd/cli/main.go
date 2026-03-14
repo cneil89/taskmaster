@@ -12,8 +12,7 @@ import (
 )
 
 type config struct {
-	testing bool
-	db      struct {
+	db struct {
 		dsn string
 	}
 }
@@ -35,7 +34,6 @@ type application struct {
 			taskTable *tview.Table
 		}
 
-		// TODO: This is a little redundant, table shows all needed info
 		selectedTaskView *tview.TextView
 	}
 }
@@ -44,8 +42,6 @@ var version = vcs.Version()
 
 func main() {
 	var cfg config
-	flag.BoolVar(&cfg.testing, "testing", false, "toggle testing WARNING: WILL DELETE ALL DATA")
-
 	displayVersion := flag.Bool("version", false, "display version and exit")
 	flag.Parse()
 

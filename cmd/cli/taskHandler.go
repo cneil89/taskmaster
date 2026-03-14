@@ -14,8 +14,11 @@ func (app *application) buildTaskTable() {
 		SetFixed(1, 0).
 		SetSeparator(tview.Borders.Vertical).
 		SetSelectedStyle(
-			tcell.StyleDefault.Background(tcell.ColorDarkCyan).Foreground(tcell.ColorWhite),
+			tcell.StyleDefault.
+				Background(tcell.ColorDarkCyan).
+				Foreground(tcell.ColorWhite),
 		)
+
 	for column, header := range tableHeaders {
 		expand := 1
 		if column == 3 {
@@ -35,15 +38,17 @@ func (app *application) buildTaskTable() {
 		for col := range len(tableHeaders) {
 			align := tview.AlignLeft
 			expand := 1
+			text := taskCellValue(task, col)
 			if col == 2 {
 				align = tview.AlignCenter
 			}
 			if col == 3 {
-				expand = 3
+				expand = 2
+				text = truncate(taskCellValue(task, col), 55)
 			}
 			app.state.component.taskTable.SetCell(row+1, col,
 				&tview.TableCell{
-					Text:      taskCellValue(task, col),
+					Text:      text,
 					Color:     tcell.ColorWhite,
 					Align:     align,
 					Expansion: expand,
@@ -69,7 +74,6 @@ func (app *application) buildTaskTable() {
 		app.state.component.taskTable.
 			SetSelectable(true, false).
 			Select(app.state.selectedRow, 0)
-
 	}
 
 	app.state.component.taskTable.
@@ -83,11 +87,13 @@ func (app *application) buildTaskTable() {
 			case 'p':
 				app.selectDifferentProject()
 				return event
+			case 't':
+				app.createNewTask()
+				return event
 			}
 
 			return event
 		})
-
 }
 
 func (app *application) editTask() {
@@ -126,21 +132,18 @@ func (app *application) editTask() {
 		AddButton("Save", func() {
 			err := app.models.Tasks.Update(tmp)
 			if err != nil {
-				// TODO: Need to do something that signifies that the update failed
+				// TODO: Gracefully fail, and inform user
 				panic(err)
 			}
 			app.state.selectedTask = &tmp
 
-			app.state.taskList, err = app.models.Tasks.GetAllTasksForActiveProject()
+			err = app.updateState()
 			if err != nil {
 				panic(err)
 			}
-
-			app.buildTaskTable()
 			app.state.pages.RemovePage("modal")
 			app.state.pages.RemovePage("taskList")
 			app.state.pages.AddPage("taskList", app.state.component.taskTable, true, true)
-
 		}).
 		AddButton("Cancel", func() {
 			app.state.pages.RemovePage("modal")
@@ -149,4 +152,69 @@ func (app *application) editTask() {
 	form.SetBorder(true).SetTitleAlign(tview.AlignCenter)
 
 	showModal(app, 60, 16, form)
+}
+
+func (app *application) createNewTask() {
+	tmp := data.Task{
+		ProjectID: app.state.activeProject.ID,
+	}
+
+	form := tview.NewForm().
+		SetFieldBackgroundColor(tcell.ColorDarkCyan).
+		SetButtonBackgroundColor(tcell.ColorSlateGrey).
+		AddInputField("Task Name:", "", 0, nil, func(v string) {
+			tmp.Name = v
+		}).
+		AddDropDown("Status", []string{
+			data.DEFINING.String(),
+			data.TODO.String(),
+			data.INPROGRESS.String(),
+			data.UNDERREVIEW.String(),
+			data.COMPLETED.String(),
+		},
+			int(tmp.Status),
+			func(option string, index int) {
+				val, err := data.ParseStatus(option)
+				if err != nil {
+					panic(err)
+				}
+				tmp.Status = val
+			}).
+		AddTextArea("Description", "", 0, 0, 0, func(changed string) {
+			tmp.Description = changed
+		}).
+		AddButton("Save", func() {
+			err := app.models.Tasks.Insert(tmp)
+			if err != nil {
+				// TODO: Gracefully fail, and inform user
+				panic(err)
+			}
+
+			err = app.updateState()
+			if err != nil {
+				// TODO: Gracefully fail, and inform user
+				panic(err)
+			}
+
+			app.state.pages.RemovePage("modal")
+			app.state.pages.RemovePage("taskList")
+			app.state.pages.AddPage("taskList", app.state.component.taskTable, true, true)
+		}).
+		AddButton("Cancel", func() {
+			app.state.pages.RemovePage("modal")
+		})
+
+	form.SetBorder(true).
+		SetTitleAlign(tview.AlignCenter).
+		SetTitle("Create New Project").
+		SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			switch event.Rune() {
+			case 'p':
+				return event
+			}
+
+			return event
+		})
+
+	showModal(app, 60, 20, form)
 }

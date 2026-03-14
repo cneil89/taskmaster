@@ -12,14 +12,14 @@ type Task struct {
 	CreatedAt   time.Time
 	Status      Status
 	TaskID      string
-	ProjectID   string
+	ProjectID   int
 	Name        string
 	Description string
 	Version     int
 }
 
 func (t *Task) Debug() {
-	fmt.Printf("{ProjID:%s Status:%s TaskID:%s Name:%s, Desc:%s Version:%d}\n",
+	fmt.Printf("{ProjID:%d Status:%s TaskID:%s Name:%s, Desc:%s Version:%d}\n",
 		t.ProjectID, t.Status, t.TaskID, t.Name, t.Description, t.Version)
 }
 
