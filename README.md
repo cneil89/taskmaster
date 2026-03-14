@@ -12,3 +12,4 @@ A more elaborate todo app
     - postgres
 - [ ] CLI hookup to backend web api
     - http requests
+- [ ] Web frontend (?)
