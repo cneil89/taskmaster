@@ -23,19 +23,15 @@ func (app *application) showCreateProjectModal() {
 			// err := app.models.Tasks.Update(tmp)
 			err := app.models.Projects.Insert(tmp.Name, tmp.ShortName)
 			if err != nil {
-				// TODO: Gracefully fail, and inform user
-				panic(err)
+				app.notifyError(err)
 			}
 
 			err = app.updateState()
 			if err != nil {
-				// TODO: Gracefully fail, and inform user
-				panic(err)
+				app.notifyError(err)
 			}
 
 			app.state.pages.RemovePage("modal")
-			app.state.pages.RemovePage("taskList")
-			app.state.pages.AddPage("taskList", app.state.component.taskTable, true, true)
 		}).
 		AddButton("Cancel", func() {
 			app.state.pages.RemovePage("modal")
@@ -62,8 +58,7 @@ func (app *application) selectDifferentProject() {
 	// Get all projects
 	app.state.availableProjects, err = app.models.Projects.GetAllProjects()
 	if err != nil {
-		// TODO: Gracefully fail, and inform user
-		panic(err)
+		app.notifyError(err)
 	}
 
 	// make table
@@ -116,19 +111,15 @@ func (app *application) selectDifferentProject() {
 	projectTable.SetSelectedFunc(func(row, column int) {
 		err := app.models.Projects.SetActiveProject(app.state.availableProjects[row-1].ID)
 		if err != nil {
-			// TODO: Gracefully fail, and inform user
-			panic(err)
+			app.notifyError(err)
 		}
 
 		err = app.updateState()
 		if err != nil {
-			// TODO: Gracefully fail, and inform user
-			panic(err)
+			app.notifyError(err)
 		}
 
 		app.state.pages.RemovePage("modal")
-		app.state.pages.RemovePage("taskList")
-		app.state.pages.AddPage("taskList", app.state.component.taskTable, true, true)
 	})
 
 	if len(app.state.availableProjects) > 0 {

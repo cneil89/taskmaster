@@ -11,14 +11,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-type config struct {
-	db struct {
-		dsn string
-	}
-}
-
 type application struct {
-	config config
 	models data.Models
 	state  struct {
 		selectedRow int
@@ -31,17 +24,15 @@ type application struct {
 		pages        *tview.Pages
 
 		component struct {
-			taskTable *tview.Table
+			taskTable        *tview.Table
+			selectedTaskView *tview.TextView
 		}
-
-		selectedTaskView *tview.TextView
 	}
 }
 
 var version = vcs.Version()
 
 func main() {
-	var cfg config
 	displayVersion := flag.Bool("version", false, "display version and exit")
 	flag.Parse()
 
@@ -56,16 +47,13 @@ func main() {
 		fmt.Printf("Unable to resolve DB path: %s\n", err)
 	}
 
-	cfg.db.dsn = dsn
-
-	db, err := db.OpenDB(cfg.db.dsn)
+	db, err := db.OpenDB(dsn)
 	if err != nil {
 		fmt.Printf("Unable to open database: %s", err.Error())
 		os.Exit(1)
 	}
 
 	app := application{
-		config: cfg,
 		models: data.NewModels(db),
 	}
 

@@ -10,13 +10,15 @@ import (
 
 func (app *application) Init() error {
 
+	app.state.pages = tview.NewPages()
+
 	err := app.updateState()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	app.state.selectedTaskView = tview.NewTextView().SetText("")
-	app.state.selectedTaskView.SetDrawFunc(
+	app.state.component.selectedTaskView = tview.NewTextView().SetText("")
+	app.state.component.selectedTaskView.SetDrawFunc(
 		func(screen tcell.Screen, x int, y int, width int, height int) (int, int, int, int) {
 			var text string
 			str := "\n%-14s %s\n%-14s %s\n%-14s %s\n%-14s %s\n%-14s %s"
@@ -46,7 +48,7 @@ func (app *application) Init() error {
 				)
 			}
 
-			app.state.selectedTaskView.SetText(text)
+			app.state.component.selectedTaskView.SetText(text)
 
 			return x, y, width, height
 		})
@@ -88,13 +90,12 @@ func (app *application) updateState() error {
 }
 
 func (app *application) Run() error {
-	app.state.pages = tview.NewPages()
 
 	logoView := tview.NewTextView().
 		SetText(LOGO).SetTextColor(tcell.ColorDarkCyan).SetTextAlign(tview.AlignCenter)
 
 	legendView := tview.NewTextView().
-		SetText("p: Select Project | P: New Project | t: Add Task | ESC: Edit Task | +/-: Quick Status Update").
+		SetText("p: Select Project | P: New Project | t: Add Task | Enter: Edit Task | +/-: Quick Status Update | ?: Info").
 		SetTextAlign(tview.AlignCenter)
 
 	rowFlex := tview.NewFlex().
@@ -105,7 +106,7 @@ func (app *application) Run() error {
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
 		AddItem(rowFlex, 0, 2, false).
-		AddItem(app.state.selectedTaskView, 0, 1, false)
+		AddItem(app.state.component.selectedTaskView, 0, 1, false)
 
 	layout := tview.NewFlex().
 		SetDirection(tview.FlexRow).
@@ -115,10 +116,9 @@ func (app *application) Run() error {
 
 	err := app.updateState()
 	if err != nil {
-		panic(err)
+		app.notifyError(err)
 	}
 
-	app.state.pages.AddPage("taskList", app.state.component.taskTable, true, true)
 	if app.state.activeProject == nil {
 		app.showCreateProjectModal()
 	}

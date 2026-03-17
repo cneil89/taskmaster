@@ -21,8 +21,10 @@ func (app *application) buildTaskTable() {
 
 	for column, header := range tableHeaders {
 		expand := 1
+		width := 0
 		if column == 3 {
-			expand = 3
+			expand = 0
+			width = DESCRIPTION_TRUNCATE
 		}
 		app.state.component.taskTable.SetCell(0, column,
 			&tview.TableCell{
@@ -31,6 +33,7 @@ func (app *application) buildTaskTable() {
 				Align:         tview.AlignCenter,
 				NotSelectable: true,
 				Expansion:     expand,
+				MaxWidth:      width,
 			})
 	}
 
@@ -38,13 +41,15 @@ func (app *application) buildTaskTable() {
 		for col := range len(tableHeaders) {
 			align := tview.AlignLeft
 			expand := 1
+			width := 0
 			text := taskCellValue(task, col)
 			if col == 2 {
 				align = tview.AlignCenter
 			}
 			if col == 3 {
-				expand = 2
-				text = truncate(taskCellValue(task, col), 55)
+				expand = 0
+				width = DESCRIPTION_TRUNCATE
+				text = truncate(taskCellValue(task, col), DESCRIPTION_TRUNCATE)
 			}
 			app.state.component.taskTable.SetCell(row+1, col,
 				&tview.TableCell{
@@ -52,6 +57,7 @@ func (app *application) buildTaskTable() {
 					Color:     tcell.ColorWhite,
 					Align:     align,
 					Expansion: expand,
+					MaxWidth:  width,
 				},
 			)
 		}
@@ -90,10 +96,20 @@ func (app *application) buildTaskTable() {
 			case 't':
 				app.createNewTask()
 				return event
+			case '+', '=':
+				app.incrementTaskStatus(*app.state.selectedTask)
+				return event
+			case '-', '_':
+				app.decrementTaskStatus(*app.state.selectedTask)
+				return event
 			}
 
 			return event
 		})
+	if app.state.pages.GetPage("taskList") != nil {
+		app.state.pages.RemovePage("taskList")
+	}
+	app.state.pages.AddPage("taskList", app.state.component.taskTable, true, true)
 }
 
 func (app *application) editTask() {
@@ -122,7 +138,7 @@ func (app *application) editTask() {
 			func(option string, index int) {
 				val, err := data.ParseStatus(option)
 				if err != nil {
-					panic(err)
+					app.notifyError(err)
 				}
 				tmp.Status = val
 			}).
@@ -132,18 +148,15 @@ func (app *application) editTask() {
 		AddButton("Save", func() {
 			err := app.models.Tasks.Update(tmp)
 			if err != nil {
-				// TODO: Gracefully fail, and inform user
-				panic(err)
+				app.notifyError(err)
 			}
 			app.state.selectedTask = &tmp
 
 			err = app.updateState()
 			if err != nil {
-				panic(err)
+				app.notifyError(err)
 			}
 			app.state.pages.RemovePage("modal")
-			app.state.pages.RemovePage("taskList")
-			app.state.pages.AddPage("taskList", app.state.component.taskTable, true, true)
 		}).
 		AddButton("Cancel", func() {
 			app.state.pages.RemovePage("modal")
@@ -176,7 +189,7 @@ func (app *application) createNewTask() {
 			func(option string, index int) {
 				val, err := data.ParseStatus(option)
 				if err != nil {
-					panic(err)
+					app.notifyError(err)
 				}
 				tmp.Status = val
 			}).
@@ -186,19 +199,17 @@ func (app *application) createNewTask() {
 		AddButton("Save", func() {
 			err := app.models.Tasks.Insert(tmp)
 			if err != nil {
-				// TODO: Gracefully fail, and inform user
-				panic(err)
+				app.notifyError(err)
+				return
 			}
 
 			err = app.updateState()
 			if err != nil {
-				// TODO: Gracefully fail, and inform user
-				panic(err)
+				app.notifyError(err)
+				return
 			}
 
 			app.state.pages.RemovePage("modal")
-			app.state.pages.RemovePage("taskList")
-			app.state.pages.AddPage("taskList", app.state.component.taskTable, true, true)
 		}).
 		AddButton("Cancel", func() {
 			app.state.pages.RemovePage("modal")
@@ -217,4 +228,35 @@ func (app *application) createNewTask() {
 		})
 
 	showModal(app, 60, 20, form)
+}
+
+func (app *application) incrementTaskStatus(task data.Task) {
+	tmp := task
+	if tmp.Status < data.COMPLETED {
+		tmp.Status++
+	}
+
+	err := app.models.Tasks.Update(tmp)
+	if err != nil {
+		app.notifyError(err)
+		return
+	}
+
+	app.updateState()
+
+}
+
+func (app *application) decrementTaskStatus(task data.Task) {
+	tmp := task
+	if tmp.Status > data.DEFINING {
+		tmp.Status--
+	}
+
+	err := app.models.Tasks.Update(tmp)
+	if err != nil {
+		app.notifyError(err)
+		return
+	}
+
+	app.updateState()
 }
