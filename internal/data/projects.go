@@ -138,12 +138,3 @@ func (m *ProjectModel) SetActiveProject(id int) error {
 
 	return tx.Commit()
 }
-
-// TODO: DELETE THIS
-// HACK: FOR TESTING ONLY
-func (m *ProjectModel) DeleteAll() {
-	_, err := m.DB.Exec(`DELETE FROM projects;`)
-	if err != nil {
-		panic(err)
-	}
-}

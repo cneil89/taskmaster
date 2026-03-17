@@ -109,12 +109,3 @@ func (m *TaskModel) Update(task Task) error {
 
 	return err
 }
-
-// TODO: DELETE THIS
-// HACK: FOR TESTING ONLY
-func (m *TaskModel) DeleteAll() {
-	_, err := m.DB.Exec(`DELETE FROM tasks;`)
-	if err != nil {
-		panic(err)
-	}
-}
