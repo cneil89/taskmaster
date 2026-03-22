@@ -95,7 +95,7 @@ func (app *application) Run() error {
 		SetText(LOGO).SetTextColor(tcell.ColorDarkCyan).SetTextAlign(tview.AlignCenter)
 
 	legendView := tview.NewTextView().
-		SetText("p: Select Project | P: New Project | t: Add Task | Enter: Edit Task | +/-: Quick Status Update | ?: Info").
+		SetText("p: Select Project | P: New Project | t: Add Task | Enter: Edit Task | +/-: Quick Status Update").
 		SetTextAlign(tview.AlignCenter)
 
 	rowFlex := tview.NewFlex().
