@@ -17,7 +17,7 @@ tasks:
       - |
         echo -n "Are you sure [y/N] "
         read ans
-        [ "${ans:-N}" =."y" ]
+        [ "${ans:-N}" = "y" ]
 
   build:api:
     desc: Build application
@@ -30,13 +30,13 @@ tasks:
       vars: [name]
     cmds:
       - echo "Creating migration files for {{.name}}..."
-      - migrate create -seq -ext=.sql -dir=./migrations {{.name}}
+      - goose create -s -dir ./migrations/ {{.name}} sql
 
   db:migrations:up:
     desc: Apply all up database migrations
     deps: [confirm]
     cmds:
       - echo "Running up migrations..."
-      - migrate ./migrations -database {{.TASKMASTER_DB_DSN}} up
+      - goose postgres {{.TASKMASTER_DB_DSN}} -dir ./migrations/ up
     vars:
       TASKMASTER_DB_DSN: '{{.TASKMASTER_DB_DSN | default "${TASKMASTER_DB_DSN}"}}'
