@@ -30,7 +30,10 @@ type application struct {
 	}
 }
 
-var version = vcs.Version()
+var (
+	version = vcs.Version()
+	DBPath  = "taskmaster-dev"
+)
 
 func main() {
 	displayVersion := flag.Bool("version", false, "display version and exit")
@@ -42,7 +45,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	dsn, err := db.GetDBPath("taskmaster", "taskm.db")
+	dsn, err := db.GetDBPath(DBPath, "taskm.db")
 	if err != nil {
 		fmt.Printf("Unable to resolve DB path: %s\n", err)
 	}

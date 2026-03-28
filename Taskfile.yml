@@ -3,7 +3,7 @@
 version: '3'
 
 vars:
-  APP_NAME: "taskmaster-api"
+  APP_NAME: "taskmaster"
 
 tasks:
   default:
@@ -22,7 +22,12 @@ tasks:
   build:api:
     desc: Build application
     cmds:
-      - go build -ldflags="-s" -o=./bin/{{.APP_NAME}} ./cmd/api
+      - go build -ldflags="-s" -o=./bin/{{.APP_NAME}}-api ./cmd/api
+
+  build:cli:
+    desc: Build cli application
+    cmds:
+      - go build -ldflags="-s -X 'main.DBPath=taskmaster'" -o=./bin/{{.APP_NAME}} ./cmd/cli
 
   db:migrations:new:
     desc : Create a new database migration (name required)
@@ -38,5 +43,23 @@ tasks:
     cmds:
       - echo "Running up migrations..."
       - goose postgres {{.TASKMASTER_DB_DSN}} -dir ./migrations/ up
+    vars:
+      TASKMASTER_DB_DSN: '{{.TASKMASTER_DB_DSN | default "${TASKMASTER_DB_DSN}"}}'
+
+  db:migrations:down:
+    desc: Apply single down database migrations
+    deps: [confirm]
+    cmds:
+      - echo "Running up migrations..."
+      - goose postgres {{.TASKMASTER_DB_DSN}} -dir ./migrations/ down
+    vars:
+      TASKMASTER_DB_DSN: '{{.TASKMASTER_DB_DSN | default "${TASKMASTER_DB_DSN}"}}'
+
+  db:migrations:reset:
+    desc: reset database migrations
+    deps: [confirm]
+    cmds:
+      - echo "Running up migrations..."
+      - goose postgres {{.TASKMASTER_DB_DSN}} -dir ./migrations/ reset
     vars:
       TASKMASTER_DB_DSN: '{{.TASKMASTER_DB_DSN | default "${TASKMASTER_DB_DSN}"}}'
