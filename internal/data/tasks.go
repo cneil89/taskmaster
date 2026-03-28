@@ -46,7 +46,7 @@ func (m *TaskModel) Insert(task Task) error {
 	}
 
 	// 2) build taskId
-	taskId := fmt.Sprintf("%s-%05d", proj.ShortName, next)
+	taskId := fmt.Sprintf("%s-%06d", proj.ShortName, next)
 
 	// 3) insert task using tx
 	stmt, err := tx.PrepareContext(ctx, `INSERT INTO tasks(task_id, project_id, name, status, description)

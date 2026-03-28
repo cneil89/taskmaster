@@ -10,7 +10,7 @@ type Status int
 
 const (
 	DEFINING Status = iota
-	TODO
+	READY
 	INPROGRESS
 	UNDERREVIEW
 	COMPLETED
@@ -18,13 +18,13 @@ const (
 
 var stringToStatus = map[string]Status{
 	"defining":     DEFINING,
-	"todo":         TODO,
+	"ready":        READY,
 	"in progress":  INPROGRESS,
 	"under review": UNDERREVIEW,
 	"completed":    COMPLETED,
 }
 
-var statusToString = [...]string{"Defining", "Todo", "In Progress", "Under Review", "Completed"}
+var statusToString = [...]string{"Defining", "Ready", "In Progress", "Under Review", "Completed"}
 
 func ParseStatus(v string) (Status, error) {
 	s, ok := stringToStatus[strings.ToLower(strings.TrimSpace(v))]

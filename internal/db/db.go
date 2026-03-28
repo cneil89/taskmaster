@@ -112,10 +112,10 @@ func bootstrapDatabase(db *sql.DB) error {
 		`CREATE TABLE IF NOT EXISTS tasks (
 			id INTEGER PRIMARY KEY,
 			created_at NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			status TEXT NOT NULL DEFAULT 'defining'
+			status TEXT NOT NULL DEFAULT 'Defining'
 				CHECK(status IN(
 					'Defining',
-					'Todo',
+					'Ready',
 					'In Progress',
 					'Under Review',
 					'Completed'
