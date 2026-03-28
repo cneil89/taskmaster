@@ -74,14 +74,13 @@ func (app *application) updateState() error {
 		return err
 	}
 
-	if len(app.state.taskList) <= app.state.selectedRow {
+	if len(app.state.taskList) == 0 {
 		app.state.selectedTask = nil
-		app.state.selectedRow = 0
-
-		if len(app.state.taskList) > 0 {
-			app.state.selectedTask = &app.state.taskList[app.state.selectedRow]
-		}
+		app.state.selectedRow = -1
 	} else {
+		if app.state.selectedRow < 0 || app.state.selectedRow >= len(app.state.taskList) {
+			app.state.selectedRow = 0
+		}
 		app.state.selectedTask = &app.state.taskList[app.state.selectedRow]
 	}
 

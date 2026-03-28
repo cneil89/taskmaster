@@ -64,12 +64,15 @@ func (app *application) buildTaskTable() {
 	}
 
 	app.state.component.taskTable.SetSelectionChangedFunc(func(row, col int) {
-		if row == 0 {
+		if row <= 0 {
+			app.state.selectedRow = -1
+			app.state.selectedTask = nil
 			return
 		}
 
-		app.state.selectedRow = row
-		app.state.selectedTask = &app.state.taskList[row-1]
+		idx := row - 1
+		app.state.selectedRow = idx
+		app.state.selectedTask = &app.state.taskList[idx]
 	})
 
 	app.state.component.taskTable.SetSelectedFunc(func(row, column int) {
@@ -77,9 +80,13 @@ func (app *application) buildTaskTable() {
 	})
 
 	if len(app.state.taskList) > 0 {
-		app.state.component.taskTable.
-			SetSelectable(true, false).
-			Select(app.state.selectedRow, 0)
+		app.state.component.taskTable.SetSelectable(true, false)
+
+		if app.state.selectedRow < 0 {
+			app.state.selectedRow = 0
+		}
+
+		app.state.component.taskTable.Select(app.state.selectedRow+1, 0)
 	}
 
 	app.state.component.taskTable.
@@ -129,7 +136,7 @@ func (app *application) editTask() {
 		}).
 		AddDropDown("Status", []string{
 			data.DEFINING.String(),
-			data.TODO.String(),
+			data.READY.String(),
 			data.INPROGRESS.String(),
 			data.UNDERREVIEW.String(),
 			data.COMPLETED.String(),
@@ -180,7 +187,7 @@ func (app *application) createNewTask() {
 		}).
 		AddDropDown("Status", []string{
 			data.DEFINING.String(),
-			data.TODO.String(),
+			data.READY.String(),
 			data.INPROGRESS.String(),
 			data.UNDERREVIEW.String(),
 			data.COMPLETED.String(),
@@ -231,6 +238,10 @@ func (app *application) createNewTask() {
 }
 
 func (app *application) incrementTaskStatus(task data.Task) {
+	if app.state.selectedTask == nil {
+		return
+	}
+
 	tmp := task
 	if tmp.Status < data.COMPLETED {
 		tmp.Status++
@@ -247,6 +258,10 @@ func (app *application) incrementTaskStatus(task data.Task) {
 }
 
 func (app *application) decrementTaskStatus(task data.Task) {
+	if app.state.selectedTask == nil {
+		return
+	}
+
 	tmp := task
 	if tmp.Status > data.DEFINING {
 		tmp.Status--
