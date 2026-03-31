@@ -7,11 +7,12 @@ import (
 )
 
 type Project struct {
-	ID        int
-	CreatedAt time.Time
-	Name      string
-	ShortName string
-	Active    bool
+	ID        int       `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	Key       string    `json:"key"`
+	Active    bool      `json:"-"` // TODO: remove
 }
 
 type ProjectModel struct {
@@ -58,7 +59,7 @@ func (m *ProjectModel) GetAllProjects() ([]Project, error) {
 	var projects []Project
 	for results.Next() {
 		var project Project
-		results.Scan(&project.ID, &project.Name, &project.ShortName, &project.Active)
+		results.Scan(&project.ID, &project.Name, &project.Key, &project.Active)
 		projects = append(projects, project)
 	}
 
@@ -83,7 +84,7 @@ func (m *ProjectModel) GetActiveProject() (*Project, error) {
 
 	var project Project
 	err = m.DB.QueryRowContext(ctx, `SELECT id, name, short_name, active FROM projects WHERE active = true LIMIT 1;`).
-		Scan(&project.ID, &project.Name, &project.ShortName, &project.Active)
+		Scan(&project.ID, &project.Name, &project.Key, &project.Active)
 	if err != nil {
 		return &Project{}, nil
 	}
@@ -96,7 +97,7 @@ func (m *ProjectModel) GetActiveForUpdate(ctx context.Context, db DBTX) (Project
 	var next int
 
 	row := db.QueryRowContext(ctx, `SELECT id, name, short_name, active, next_task_value FROM projects WHERE active = true;`)
-	if err := row.Scan(&p.ID, &p.Name, &p.ShortName, &p.Active, &next); err != nil {
+	if err := row.Scan(&p.ID, &p.Name, &p.Key, &p.Active, &next); err != nil {
 		return Project{}, 0, err
 	}
 

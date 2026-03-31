@@ -8,14 +8,17 @@ import (
 )
 
 type Task struct {
-	ID          int
-	CreatedAt   time.Time
-	Status      Status
-	TaskID      string
-	ProjectID   int
-	Name        string
-	Description string
-	Version     int
+	ID          int       `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Status      Status    `json:"status"`
+	TaskID      string    `json:"task_id"`
+	ProjectID   int       `json:"project_id"`
+	AssigneeID  int       `json:"assignee_id"`
+	OwnerID     int       `json:"owder_id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Version     int       `json:"-"`
 }
 
 func (t *Task) Debug() {
@@ -46,7 +49,7 @@ func (m *TaskModel) Insert(task Task) error {
 	}
 
 	// 2) build taskId
-	taskId := fmt.Sprintf("%s-%06d", proj.ShortName, next)
+	taskId := fmt.Sprintf("%s-%06d", proj.Key, next)
 
 	// 3) insert task using tx
 	stmt, err := tx.PrepareContext(ctx, `INSERT INTO tasks(task_id, project_id, name, status, description)
