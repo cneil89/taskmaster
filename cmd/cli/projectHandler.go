@@ -17,11 +17,11 @@ func (app *application) showCreateProjectModal() {
 			tmp.Name = v
 		}).
 		AddInputField("Short Name:", "", 0, nil, func(v string) {
-			tmp.ShortName = v
+			tmp.Key = v
 		}).
 		AddButton("Save", func() {
 			// err := app.models.Tasks.Update(tmp)
-			err := app.models.Projects.Insert(tmp.Name, tmp.ShortName)
+			err := app.models.Projects.Insert(tmp.Name, tmp.Key)
 			if err != nil {
 				app.notifyError(err)
 			}

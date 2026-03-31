@@ -123,7 +123,7 @@ func (app *application) editTask() {
 	tmp := data.Task{
 		ID:          app.state.selectedTask.ID,
 		Version:     app.state.selectedTask.Version,
-		Name:        app.state.activeProject.Name,
+		Name:        app.state.selectedTask.Name,
 		TaskID:      app.state.selectedTask.TaskID,
 		Status:      app.state.selectedTask.Status,
 		Description: app.state.selectedTask.Description,

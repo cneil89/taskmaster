@@ -23,7 +23,7 @@ func (app *application) Init() error {
 			var text string
 			str := "\n%-14s %s\n%-14s %s\n%-14s %s\n%-14s %s\n%-14s %s"
 
-			activeProj := &data.Project{Name: "", ShortName: ""}
+			activeProj := &data.Project{Name: "", Key: ""}
 			if app.state.activeProject != nil {
 				activeProj = app.state.activeProject
 			}
