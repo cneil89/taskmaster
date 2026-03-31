@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -40,6 +41,28 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data any, h
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(js)
+
+	return nil
+}
+
+func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dest any) error {
+	r.Body = http.MaxBytesReader(w, r.Body, 1_048_576)
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	err := dec.Decode(&dest)
+	if err != nil {
+		var syntaxError *json.SyntaxError
+
+		switch {
+		case errors.As(err, &syntaxError):
+			return fmt.Errorf("body contains badly-formed JSON (at character %d)", syntaxError.Offset)
+		case errors.Is(err, io.ErrUnexpectedEOF):
+			return errors.New("body contains badly-formed JSON")
+		default:
+			return err
+		}
+	}
 
 	return nil
 }
